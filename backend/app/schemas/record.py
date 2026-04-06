@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import date
 from app.models.record import RecordType
 
 class RecordBase(BaseModel):
-    amount: float
+    amount: float = Field(gt=0, description="Amount must be positive")
     type: RecordType
     category: str
     record_date: date
@@ -24,11 +24,12 @@ class RecordResponse(RecordBase):
     id: int
     created_by: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class DashboardSummaryResponse(BaseModel):
     total_income: float
     total_expenses: float
     net_balance: float
     category_totals: dict[str, float]
+    recent_activity: list[RecordResponse]
+    monthly_trends: dict[str, float]

@@ -9,5 +9,5 @@ from app.services.dashboard_service import DashboardService
 router = APIRouter()
 
 @router.get("/summary", response_model=DashboardSummaryResponse)
-def get_summary(db: Session = Depends(get_session), _ = Depends(RequireRole([Role.ADMIN, Role.ANALYST]))):
+def get_summary(db: Session = Depends(get_session), _ = Depends(RequireRole([Role.ADMIN, Role.ANALYST, Role.VIEWER]))):
     return DashboardService.get_summary(db)

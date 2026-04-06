@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 from app.api.deps import RequireRole, get_current_active_user
@@ -17,9 +18,13 @@ def get_records(
     limit: int = 100,
     type: Optional[RecordType] = None,
     category: Optional[str] = None,
-    _ = Depends(get_current_active_user)
+    start_date: Optional[date] = None,
+    end_date: Optional[date] = None,
+    _ = Depends(RequireRole([Role.ADMIN, Role.ANALYST]))
 ):
-    return RecordService.get_records(db, skip=skip, limit=limit, type=type, category=category)
+    return RecordService.get_records(
+        db, skip=skip, limit=limit, type=type, category=category, start_date=start_date, end_date=end_date
+    )
 
 @router.post("/", response_model=RecordResponse)
 def create_record(record_in: RecordCreate, db: Session = Depends(get_session), current_user = Depends(RequireRole([Role.ADMIN]))):

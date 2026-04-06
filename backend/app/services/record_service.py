@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Optional
 from sqlmodel import Session, select
 from app.models.record import FinancialRecord, RecordType
@@ -9,13 +10,25 @@ class RecordService:
         return db.get(FinancialRecord, record_id)
 
     @staticmethod
-    def get_records(db: Session, skip: int = 0, limit: int = 100, type: Optional[RecordType] = None, category: Optional[str] = None):
+    def get_records(
+        db: Session, 
+        skip: int = 0, 
+        limit: int = 100, 
+        type: Optional[RecordType] = None, 
+        category: Optional[str] = None,
+        start_date: Optional[date] = None,
+        end_date: Optional[date] = None
+    ):
         stmt = select(FinancialRecord)
         if type:
             stmt = stmt.where(FinancialRecord.type == type)
         if category:
             stmt = stmt.where(FinancialRecord.category == category)
-        return db.exec(stmt.offset(skip).limit(limit)).all()
+        if start_date:
+            stmt = stmt.where(FinancialRecord.record_date >= start_date)
+        if end_date:
+            stmt = stmt.where(FinancialRecord.record_date <= end_date)
+        return db.exec(stmt.offset(skip).limit(limit).order_by(FinancialRecord.record_date.desc())).all()
 
     @staticmethod
     def create_record(db: Session, record: RecordCreate, user_id: int) -> FinancialRecord:

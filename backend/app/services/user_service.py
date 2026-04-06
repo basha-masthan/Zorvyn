@@ -31,11 +31,20 @@ class UserService:
         data = user_in.model_dump(exclude_unset=True)
         if "password" in data:
             data["hashed_password"] = get_password_hash(data.pop("password"))
-            
         for key, val in data.items():
             setattr(user, key, val)
-            
         db.add(user)
         db.commit()
         db.refresh(user)
         return user
+
+    @staticmethod
+    def get_user(db: Session, user_id: int) -> Optional[User]:
+        return db.get(User, user_id)
+
+    @staticmethod
+    def delete_user(db: Session, user_id: int):
+        db_user = db.get(User, user_id)
+        if db_user:
+            db.delete(db_user)
+            db.commit()
